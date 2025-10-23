@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>王校長的 GPTs </title>
+    <!-- 載入 Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 使用 Inter 字體 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #606060; /* 中灰色背景 */
+            color: #ffffff; /* 純白色 */
+        }
+
+        /* 項目網格容器 */
+        .container {
+            display: grid;
+            /* 在小螢幕上為2欄，中等螢幕以上為4欄，確保響應性 */
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 24px;
+            max-width: 1400px;
+            margin: 10px auto; /* 進一步縮小頂部和底部間距 */
+            padding: 24px;
+        }
+
+        /* 單個作品卡片 */
+        .item-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 20px 10px;
+            border-radius: 16px;
+            background-color: #FFFFFF; /* 純白色卡片背景 */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            height: 100%; /* 確保卡片高度一致 */
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        /* 圓形圖片/圖標容器 */
+        .item-image-wrapper {
+            width: 90px; /* 已縮小 */
+            height: 90px; /* 已縮小 */
+            border-radius: 50%;
+            overflow: hidden;
+            margin-bottom: 10px; /* 稍微調整邊距 */
+            position: relative;
+            background-color: #4a4a4a; /* 中等深色背景 */
+            border: 4px solid #7c0816; /* 已更新為深紅色框線 */
+            display: flex; /* 確保佔位符文本居中 */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .item-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* 圖片佔位符文本 */
+        .placeholder-text {
+            color: #000000; /* 調整為黑色以適應白色卡片背景 */
+            font-size: 0.65em; /* 稍微縮小以適應圓形 */
+            padding: 5px;
+            line-height: 1.2;
+            white-space: pre-wrap;
+        }
+
+        /* 作品標題 */
+        .item-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 5px;
+            color: #000000; /* 調整為黑色以適應白色卡片背景 */
+        }
+
+        /* 作品副標題/說明 */
+        .item-description {
+            font-size: 0.85em;
+            color: #000000; /* 調整為黑色以適應白色卡片背景 */
+            white-space: pre-wrap;
+            line-height: 1.4;
+            /* 讓文字區塊能有足夠空間 */
+            min-height: 40px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1; /* 讓描述區塊撐滿剩餘空間，確保卡片高度一致 */
+            padding-bottom: 5px;
+        }
+
+        /* 頂部標題 */
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            /* 移除分隔線: border-bottom: 1px solid #444444; */
+            margin-bottom: 5px; /* 進一步縮小與下方卡片的間距 */
+        }
+        .header h1 {
+            color: #ffffff; /* 純白色 */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1 class="text-4xl font-bold">王校長的 GPTs </h1> <!-- 已將 text-3xl 更改為 text-4xl -->
+    </div>
+
+    <div class="container">
+
+        <!-- 輔助函數：生成卡片 (純 JS 實現，以符合單一檔案規範) -->
+        <script>
+            /**
+             * 根據數據生成 HTML 卡片元素。
+             * @param {string} imgAlt 圖片替代文字 (作為佔位符的內容)
+             * @param {string} title 標題
+             * @param {string} description 描述/副標題
+             * @param {string} src 圖片 URL (佔位符)
+             * @param {string} link 點擊後開啟的連結
+             */
+            function createItemCard(imgAlt, title, description, src, link) {
+                // 將描述中的換行符轉換為 HTML 換行標籤
+                const safeDescription = description.replace(/\n/g, '<br>');
+                
+                // 根據是否有連結來決定點擊事件
+                const clickAction = link 
+                    ? `window.open('${link}', '_blank');` 
+                    : `alert('你點擊了：${title}');`;
+
+                // 使用 onerror 實現圖片載入失敗時，顯示 imgAlt 文字作為佔位符
+                return `
+                <div class="item-card" onclick="${clickAction}">
+                    <div class="item-image-wrapper">
+                        <!-- 圖片載入失敗時，隱藏圖片並顯示 imgAlt 文字 -->
+                        <img src="${src}" alt="${imgAlt}" class="item-image" onerror="this.style.display='none'; this.closest('.item-image-wrapper').innerHTML='<div class=\\'placeholder-text\\'>${imgAlt.replace(/'/g, '\\\'')}</div>'">
+                    </div>
+                    <div class="item-title">${title}</div>
+                    <div class="item-description">${safeDescription}</div>
+                </div>
+                `;
+            }
+
+            // 根據您的 PDF 內容組織的數據陣列
+            const items = [
+                // 翻譯與語言類
+                { img: "女性頭像 1", title: "專屬翻譯助手", desc: "My GPTs", link: "https://chatgpt.com/g/g-68d66708fd308191a2d978eb72e10f90-si-jia-fan-yi" }, 
+                { img: "女性頭像 2", title: "越南區多益考試專家", desc: "My GPTs", link: 'https://chatgpt.com/g/g-vGUdmUbq4-yue-nan-qu-duo-yi-kao-shi-zhuan-jia' }, // <-- 已更新標題和連結
+                { img: "男性頭像 1", title: "台灣高鐵時刻表查詢小幫手", desc: "My GPTs", link: 'https://chatgpt.com/g/g-lNJHGtJ8B-tai-wan-gao-tie-shi-ke-biao-cha-xun-xiao-bang-shou' }, // <-- 標題已更改為「台灣高鐵時刻表查詢小幫手」並新增連結
+                
+                // 虛擬人物與文化類
+                { img: "男性頭像 2 (王校長)", title: "「王校長」AI 虛擬人格", desc: "My GPTs", link: "https://chatgpt.com/g/g-68e172222c0081918f878a0822c6be42-wang-xiao-chang-xu-ni-ren-ge" }, // <-- 已新增連結
+                { img: "紅色S形圖標", title: "六十甲子籤 AI 媽祖", desc: "My GPTs", link: "https://chatgpt.com/g/g-05xczLqOt-liu-shi-jia-zi-qian-ai-ma-zu" }, // <-- 已新增連結
+                
+                // 查詢與工具類
+                { img: "台鐵火車圖標", title: "台鐵火車 時刻查詢", desc: "My GPTs", link: 'https://chatgpt.com/g/g-sjgst6quy-tai-tie-huo-che-shi-ke-cha-xun' }, // <-- 已新增連結
+                { img: "OpenAI 標誌", title: "2025海聯招生簡章", desc: "My GPTs", link: 'https://chatgpt.com/g/g-JuUiwXa6x-hai-wai-tai-wan-xue-xiao-zhao-sheng-jian-zhang-cha-xun-ji-qi-ren' }, // <-- 標題已更改並新增連結
+                { img: "漢字「漢」圖標", title: "2026海聯招生簡章(待公布)", desc: "My GPTs", link: '' }, // <-- 標題已更改
+                
+                // 教育與考試類
+                { img: "計算機圖標", title: "僑考[數學科] 考古題系統", desc: "My GPTs", link: 'https://chatgpt.com/g/g-68d10ccb901081918564d89450d7a9cf-hai-lian-qiao-kao-shu-xue-ke-kao-gu-ti-xi-系統-110-114xue-nian' }, // <-- 已新增連結
+                { img: "實驗室圖標", title: "僑考[化學科] 考古題系統", desc: "My GPTs", link: 'https://chatgpt.com/g/g-68d3a8315c648191ab97d31be8c41f0b-hai-lian-qiao-kao-hua-xue-ke-kao-gu-ti-xi-系統' }, // <-- 已新增連結
+                { img: "漫畫女性頭像", title: "僑考[國文科] 考古題系統", desc: "My GPTs", link: 'https://chatgpt.com/g/g-68d3fce631dc819184f761093e0a2473-hai-lian-qiao-kao-guo-wen-ke-kao-gu-ti-xi-tong' }, // <-- 已新增連結
+                
+                // 升學與備審資料
+                { img: "臺大醫學系校徽", title: "台灣大學醫學系面試機器人", desc: "My GPTs", link: 'https://chatgpt.com/g/g-680641f75468819183dd96233f32a6d9-tai-da-yi-xue-xi-mian-shi-ji-qi-ren' }, // <-- 標題已更改, 新增連結
+                { img: "女性頭像 3", title: "「備審資料」查詢機器人", desc: "My GPTs", link: 'https://chatgpt.com/g/g-6805a7f6ad608191a69f44c3f6400a4c-wang-ke-jing-bei-shen-zi-liao-cha-xun-ji-qi-ren' }, // <-- 標題已更改, 新增連結
+                { img: "雙人/雙子座圖標", title: "「自主學習計畫」「專題報告」評分專家", desc: "My GPTs", link: 'https://chatgpt.com/g/g-nAqumKon4-zhuan-ti-bao-gao-ping-fen-zhuan-jia' }, // <-- 標題已更改, 新增連結
+                { img: "書本與星形圖標", title: "擔任幹部經驗 範本專家", desc: "My GPTs", link: 'https://chatgpt.com/g/g-4H2RR9PLO-dan-ren-gan-bu-jing-yan-fan-ben-zhuan-jia' }, // <-- 已新增連結
+                { img: "兔子與魔術帽圖標", title: "社團活動經驗 範本專家", desc: "My GPTs", link: 'https://chatgpt.com/g/g-yjlpn7K9h-she-tuan-huo-dong-jing-yan-fan-ben-zhuan-jia' }, // <-- 已新增連結
+
+                // 招生簡章類
+                { img: "王豫臺 Logo", title: "「自主學習計畫書」AI 撰寫助手", desc: "My GPTs", link: 'https://chatgpt.com/g/g-gCND2oOUg-zi-zhu-xue-xi-ji-hua-shu-zhuan-xie-ji-qi-ren' }, // <-- 標題已更改為「「自主學習計畫書」AI 撰寫助手」
+                { img: "戴墨鏡男性頭像", title: "專屬AI醫療諮詢顧問", desc: "My GPTs", link: 'https://chatgpt.com/g/g-B4W1NncX3-a-i-yi-liao-zi-xun-gu-wen' }, // <-- 標題已更改為「專屬AI醫療諮詢顧問」
+                
+                // 專業與心理類
+                { img: "畢業帽與醫學圖標", title: "數位醫學教授家教", desc: "My GPTs", link: 'https://chatgpt.com/g/g-KQEkMr0Sh-shu-wei-yi-xue-jiao-shou' }, // <-- 標題已更改為「數位醫學教授家教」並新增連結
+                { img: "粉紅玫瑰圖標", title: "魔法心理諮商", desc: "My GPTs", link: 'https://chatgpt.com/g/g-c8CDNHx2r-mo-fa-xin-li-zi-shang' }, // <-- 標題已更改為「魔法心理諮商」並新增連結
+                
+                // 新增的卡片
+                { img: "新 GPT 1", title: "語言治療師", desc: "My GPTs", link: 'https://chatgpt.com/g/g-klx3wedpg-yu-yan-zhi-liao-shi' }, // <-- 標題已更改為「語言治療師」並新增連結
+                { img: "新 GPT 2", title: "標題2", desc: "My GPTs", link: '' },
+                { img: "新 GPT 3", title: "標題3", desc: "My GPTs", link: '' },
+                { img: "新 GPT 4", title: "標題4", desc: "My GPTs", link: '' },
+            ];
+
+            const container = document.querySelector('.container');
+            let htmlContent = '';
+            
+            // 定義新的圖片 URL
+            const gptsIconUrl = "https://images4.imagebam.com/c7/ec/12/ME172GEX_o.png"; 
+
+            items.forEach((item, index) => {
+                // 傳遞 link 參數
+                htmlContent += createItemCard(item.img, item.title, item.desc, gptsIconUrl, item.link);
+            });
+
+            container.innerHTML = htmlContent;
+
+        </script>
+
+    </div>
+
+</body>
+</html>

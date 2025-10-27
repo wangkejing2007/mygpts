@@ -1,436 +1,218 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Pages</title>
-    <!-- 引入 Tailwind CSS CDN -->
+    <title>王校長的 GPTs </title>
+    <!-- 載入 Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Noto Sans TW 字型 -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        /* 使用 Inter 字體 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
-            font-family: 'Noto Sans TC', sans-serif;
-            /* 隱藏主體的滾動條 */
-            overflow: hidden; 
-            background-color: #49010a; /* 頁面底色維持不變 (深紅) */
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #606060; /* 中灰色背景 */
+            color: #ffffff; /* 純白色 */
         }
 
-        /* 橫向滾動容器的樣式 */
-        #horizontal-scroll-section {
-            /* 設置高度為視窗高度，將內容垂直置中 */
-            height: 100vh;
-            /* 允許水平滾動 */
-            overflow-x: scroll;
-            /* 隱藏滾動條 */
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE and Edge */
-            
-            /* 確保內容橫向排列，垂直居中 */
-            display: flex;
-            align-items: center; /* 垂直居中 */
-            flex-wrap: nowrap;
+        /* 項目網格容器 */
+        .container {
+            display: grid;
+            /* 在小螢幕上為2欄，中等螢幕以上為4欄，確保響應性 */
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 24px;
+            max-width: 1400px;
+            margin: 10px auto; /* 進一步縮小頂部和底部間距 */
+            padding: 24px;
         }
 
-        #horizontal-scroll-section::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, Opera */
-        }
-        
-        /* 單張圖片卡片的樣式 (250px 寬 x 375px 高) */
-        .image-card {
-            width: 250px; 
-            height: 375px; 
-            flex-shrink: 0;
-            /* 只有在手動滾動時，容器重新套用 snap-x 才會啟用此貼齊效果 */
-            scroll-snap-align: center; 
-            transition: transform 0.3s ease;
-            /* 大幅加大並加深的陰影效果 */
-            box-shadow: 0 60px 120px -30px rgba(0, 0, 0, 0.6), 0 30px 30px -15px rgba(0, 0, 0, 0.5);
-        }
-        
-        /* 替換 placehold.co 圖片，使用 div 顯示編號/內容並控制字體大小 */
-        .card-number {
+        /* 單個作品卡片 */
+        .item-card {
             display: flex;
-            /* 垂直堆疊標題與描述 */
-            flex-direction: column; 
+            flex-direction: column;
             align-items: center;
+            text-align: center;
+            padding: 20px 10px;
+            border-radius: 16px;
+            background-color: #FFFFFF; /* 純白色卡片背景 */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            height: 100%; /* 確保卡片高度一致 */
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        /* 圓形圖片/圖標容器 */
+        .item-image-wrapper {
+            width: 90px; /* 已縮小 */
+            height: 90px; /* 已縮小 */
+            border-radius: 50%;
+            overflow: hidden;
+            margin-bottom: 10px; /* 稍微調整邊距 */
+            position: relative;
+            background-color: #4a4a4a; /* 中等深色背景 */
+            border: 4px solid #7c0816; /* 已更新為深紅色框線 */
+            display: flex; /* 確保佔位符文本居中 */
             justify-content: center;
+            align-items: center;
+        }
+
+        .item-image {
             width: 100%;
             height: 100%;
-            
-            /* 標題文字顏色統一為白色 */
-            color: #FFFFFF; 
-            transition: opacity 0.5s ease;
-            /* 確保連結文字沒有底線 */
-            text-decoration: none; 
-            text-align: center; /* 文字置中 */
-            padding: 20px; /* 增加內邊距 */
+            object-fit: cover;
+        }
+        
+        /* 圖片佔位符文本 */
+        .placeholder-text {
+            color: #000000; /* 調整為黑色以適應白色卡片背景 */
+            font-size: 0.65em; /* 稍微縮小以適應圓形 */
+            padding: 5px;
+            line-height: 1.2;
+            white-space: pre-wrap;
         }
 
-        .card-title {
-            font-size: 2rem; /* 保留主標題的尺寸 */
-            font-weight: 700;
-            margin-bottom: 0.5rem; /* 標題與描述間距 */
+        /* 作品標題 */
+        .item-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 5px;
+            color: #000000; /* 調整為黑色以適應白色卡片背景 */
         }
 
-        .card-description {
-            font-size: 1rem; /* 描述文字較小 */
-            font-weight: 400;
-            /* 描述文字顏色統一為亮黃色 (#f6e809) */
-            color: #f6e809; 
+        /* 作品副標題/說明 */
+        .item-description {
+            font-size: 0.85em;
+            color: #000000; /* 調整為黑色以適應白色卡片背景 */
+            white-space: pre-wrap;
+            line-height: 1.4;
+            /* 讓文字區塊能有足夠空間 */
+            min-height: 40px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1; /* 讓描述區塊撐滿剩餘空間，確保卡片高度一致 */
+            padding-bottom: 5px;
         }
 
-        /* 懸停時的透明度變化 */
-        .image-card:hover .card-number {
-            opacity: 0.8;
+        /* 頂部標題 */
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            /* 移除分隔線: border-bottom: 1px solid #444444; */
+            margin-bottom: 5px; /* 進一步縮小與下方卡片的間距 */
+        }
+        .header h1 {
+            color: #ffffff; /* 純白色 */
         }
     </style>
 </head>
-<body class="text-gray-800">
+<body>
 
-    <!-- 網頁標題 -->
-    <div class="fixed top-1 left-1 text-2xl font-extrabold text-red-600 z-50">
-        MyPages
+    <div class="header">
+        <h1 class="text-4xl font-bold">王校長的 GPTs </h1> <!-- 已將 text-3xl 更改為 text-4xl -->
     </div>
 
-    <!-- 主橫向滾動容器 -->
-    <div id="horizontal-scroll-section" class="scroll-smooth flex py-10 px-8">
-        
-        <!-- 連結：My Tools (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/mytools/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">My Tools</div>
-                <div class="card-description">王校長的日常工具</div>
-            </div>
-        </a>
+    <div class="container">
 
-        <!-- 連結：王校長的 GPTs (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/mygpts/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">王校長的 GPTs</div>
-                <div class="card-description">精選 GPTs 清單</div>
-            </div>
-        </a>
-
-        <!-- 連結：ChatGPT-Prompts (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/ChatGPT-Prompts/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">ChatGPT-Prompts</div>
-                <div class="card-description">回應控制指南</div>
-            </div>
-        </a>
-
-        <!-- 連結：特殊選才管道全解析 (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/special_way/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">特殊選才管道全解析</div>
-                <div class="card-description">115 學年度</div>
-            </div>
-        </a>
-
-        <!-- 連結：僑生須知-問與答 (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/Information-for-Overseas-Chinese-Students/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">僑生須知-問與答</div>
-                <div class="card-description">海外聯合招生委員會</div>
-            </div>
-        </a>
-        
-        <!-- 連結：僑生返臺升學說明會 (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/College-Entrance-Exam-Information-Session/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">僑生返臺升學說明會</div>
-                <div class="card-description">西元 2025-09-25</div>
-            </div>
-        </a>
-
-        <!-- 連結：僑考[數學科]答案表分析 (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/math_answer/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">僑考[數學科]答案表分析</div>
-                <div class="card-description">110 至 114 學年度</div>
-            </div>
-        </a>
-
-        <!-- 連結：聯合分發校系查詢系統 (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/2026-search/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">聯合分發校系查詢系統</div>
-                <div class="card-description">2026海外聯合招生委員會</div>
-            </div>
-        </a>
-
-        <!-- 連結：僑考[國文科]命題趨勢分析 (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/OCSE_Chinese/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">僑考[國文科]命題趨勢分析</div>
-                <div class="card-description">110學年度～114學年度</div>
-            </div>
-        </a>
-
-        <!-- 連結：僑民役男新規定 (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/OCM_CA/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">僑民役男新規定</div>
-                <div class="card-description">2025僑務委員會</div>
-            </div>
-        </a>
-        
-        <!-- 連結：僑考數學科試題分析 (第11張) (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/cmn-hant.overseas-math/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">僑考數學科試題分析</div>
-                <div class="card-description">110-114學年度</div>
-            </div>
-        </a>
-
-        <!-- 連結：僑考聯合分發榜單查詢 (第12張) (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/Joint-Distribution/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">僑考聯合分發榜單查詢</div>
-                <div class="card-description">114學年度第三梯次</div>
-            </div>
-        </a>
-
-        <!-- 連結：臺大系統推薦入學校系查詢 (第13張) (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/115_Taiwan_System/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">臺大系統推薦入學校系查詢</div>
-                <div class="card-description">115學年度學士班</div>
-            </div>
-        </a>
-
-        <!-- 連結：十八學群推薦函範本 (第14張) (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/18-Fields/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">十八學群推薦函範本</div>
-                <div class="card-description">王校長</div>
-            </div>
-        </a>
-
-        <!-- 連結：臺大系統推薦入學榜單查詢 (第15張) (底色更新為 #5f060d) -->
-        <a href="https://wangkejing2007.github.io/School-Recommendation/" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">臺大系統推薦入學榜單查詢</div>
-                <div class="card-description">114學年度</div>
-            </div>
-        </a>
-        
-        <!-- 連結：115學年APCS校系查詢 (第16張) (底色更新為 #5f060d) -->
-        <a href="https://script.google.com/macros/s/AKfycbxjjeB8BRRFcgBurJLkCtOI3sOYCRon6eNf7jGTn5FWFN9DOA-3h0zjwQ-UC7huSqDSeQ/exec" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">115學年APCS校系查詢</div>
-                <div class="card-description">Apps Script</div>
-            </div>
-        </a>
-
-        <!-- 連結：2026僑考聯合分發校系查詢 (第17張) (底色更新為 #5f060d) -->
-        <a href="https://script.google.com/macros/s/AKfycbzulL9bp9d_9d0SVnRqwiiHwDRvXFUk4qk7RVC9BxT62J8Lw5HrvrMvHHMBfgutVHgT-w/exec" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">2026僑考聯合分發校系查詢</div>
-                <div class="card-description">Apps Script</div>
-            </div>
-        </a>
-
-        <!-- 連結：特殊選才校系查詢系統 (第18張) (底色更新為 #5f060d) -->
-        <a href="https://script.google.com/macros/s/AKfycbzcVk9htZ6o700bJ3H1GHRwjjzskembMWHHY5aCQb0ktFS0HnrFzwDERCAVcTu3_wim/exec" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">特殊選才校系查詢系統</div>
-                <div class="card-description">Apps Script</div>
-            </div>
-        </a>
-
-        <!-- 連結：AI圖片提示詞產生器 (第19張) (底色更新為 #5f060d) -->
-        <a href="https://ai.studio/apps/drive/12zjyYTHd3pdUWWB0XRK1fzfauFR31c0t" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">AI圖片提示詞產生器</div>
-                <div class="card-description">Google AI Studio</div>
-            </div>
-        </a>
-
-        <!-- 連結：章節規劃及提示詞 (第20張) (底色更新為 #5f060d) -->
-        <a href="https://gemini.google.com/gem/95e4b2ce43b7" target="_blank" class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">章節規劃及提示詞</div>
-                <div class="card-description">Gem</div>
-            </div>
-        </a>
-
-        <!-- 圖片 021 (底色更新為 #5f060d) -->
-        <div class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">021</div>
-                <div class="card-description">描述21</div>
-            </div>
-        </div>
-
-        <!-- 圖片 022 (底色更新為 #5f060d) -->
-        <div class="image-card mx-2 overflow-hidden hover:scale-[1.03] rounded-2xl" style="background-color: #5f060d;">
-            <div class="card-number">
-                <div class="card-title">022</div>
-                <div class="card-description">描述22</div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- 訊息提示框 (取代 alert) -->
-    <div id="message-box" class="fixed top-0 left-1/2 -translate-x-1/2 mt-8 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-2xl opacity-0 transition-opacity duration-500 z-50 pointer-events-none">
-        訊息
-    </div>
-
-    <script>
-        // 設定應用程式 ID
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        // ----------------------------------------------------
-        // 訊息提示功能 (取代 alert)
-        // ----------------------------------------------------
-        function showMessage(text) {
-            const msgBox = document.getElementById('message-box');
-            msgBox.textContent = text;
-            msgBox.classList.remove('opacity-0');
-            msgBox.classList.add('opacity-100');
-            setTimeout(() => {
-                msgBox.classList.remove('opacity-100');
-                msgBox.classList.add('opacity-0');
-            }, 3000);
-        }
-
-        // ----------------------------------------------------
-        // 橫向滾動邏輯 (連續自動滾動與手動中斷)
-        // ----------------------------------------------------
-        const scrollContainer = document.getElementById('horizontal-scroll-section');
-        const SCROLL_SPEED = 1.0; // 連續滾動速度：1.0 像素/幀
-        const USER_INTERRUPT_DELAY = 1000; // 手動滾動後延遲 1 秒恢復自動滾動
-        
-        let animationFrameId = null; 
-        let userScrollTimeout = null;
-
-        /**
-         * 實現連續、平滑的自動滾動循環
-         */
-        function continuousScrollLoop() {
-            // 檢查是否已滾動到結尾
-            const currentScrollLeft = scrollContainer.scrollLeft;
-            const totalScrollableWidth = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-            const tolerance = 1; // 避免浮點數誤差
-
-            if (currentScrollLeft >= totalScrollableWidth - tolerance) {
-                // 循環：回到起點
-                scrollContainer.scrollLeft = 0;
-            } else {
-                // 緩慢向右滾動
-                scrollContainer.scrollLeft += SCROLL_SPEED;
-            }
-
-            // 請求下一幀動畫
-            animationFrameId = requestAnimationFrame(continuousScrollLoop);
-        }
-
-        /**
-         * 開始自動滾動 (連續模式)
-         */
-        function startAutoScroll() {
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-            // 移除 scroll-snap 類，以允許平滑、非貼齊的滾動 (如果之前有新增的話)
-            scrollContainer.classList.remove('snap-x', 'snap-mandatory'); 
-            animationFrameId = requestAnimationFrame(continuousScrollLoop);
-        }
-
-        /**
-         * 停止自動滾動
-         */
-        function stopAutoScroll() {
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
-            // 恢復 scroll-snap 類，以便用戶手動滾動時仍有貼齊效果 (這裡應新增 scroll-snap 類以配合 CSS 中的 scroll-snap-align)
-            scrollContainer.classList.add('snap-x', 'snap-mandatory');
-        }
-
-        /**
-         * 停止自動滾動並在一段延遲後重新啟動
-         */
-        function startAutoScrollWithDelay() {
-            stopAutoScroll(); // 確保停止當前動畫循環
-            clearTimeout(userScrollTimeout);
-            // 延遲後重新啟動連續滾動
-            userScrollTimeout = setTimeout(startAutoScroll, USER_INTERRUPT_DELAY); 
-        }
-
-        // 監聽滾輪事件 (用戶手動滾動)
-        scrollContainer.addEventListener('wheel', (e) => {
-            // 檢查滾動方向是否為垂直滾動 (e.deltaY)
-            if (Math.abs(e.deltaY) > 5) {
-                e.preventDefault(); // 阻止瀏覽器預設的垂直滾動行為
+        <!-- 輔助函數：生成卡片 (純 JS 實現，以符合單一檔案規範) -->
+        <script>
+            /**
+             * 根據數據生成 HTML 卡片元素。
+             * @param {string} imgAlt 圖片替代文字 (作為佔位符的內容)
+             * @param {string} title 標題
+             * @param {string} description 描述/副標題
+             * @param {string} src 圖片 URL (佔位符)
+             * @param {string} link 點擊後開啟的連結
+             */
+            function createItemCard(imgAlt, title, description, src, link) {
+                // 將描述中的換行符轉換為 HTML 換行標籤
+                const safeDescription = description.replace(/\n/g, '<br>');
                 
-                // 根據垂直滾動的量 (e.deltaY) 來執行水平滾動
-                scrollContainer.scrollBy({
-                    left: e.deltaY * 1.5,
-                    behavior: 'smooth'
-                });
+                // 根據是否有連結來決定點擊事件
+                const clickAction = link 
+                    ? `window.open('${link}', '_blank');` 
+                    : `alert('你點擊了：${title}');`;
 
-                // 用戶互動時，暫停自動滾動，並在停止後重新計時
-                startAutoScrollWithDelay();
+                // 使用 onerror 實現圖片載入失敗時，顯示 imgAlt 文字作為佔位符
+                return `
+                <div class="item-card" onclick="${clickAction}">
+                    <div class="item-image-wrapper">
+                        <!-- 圖片載入失敗時，隱藏圖片並顯示 imgAlt 文字 -->
+                        <img src="${src}" alt="${imgAlt}" class="item-image" onerror="this.style.display='none'; this.closest('.item-image-wrapper').innerHTML='<div class=\\'placeholder-text\\'>${imgAlt.replace(/'/g, '\\\'')}</div>'">
+                    </div>
+                    <div class="item-title">${title}</div>
+                    <div class="item-description">${safeDescription}</div>
+                </div>
+                `;
             }
-        }, { passive: false });
-        
-        // 監聽觸摸移動事件 (用於手機/觸控板滾動)
-        let isDragging = false;
-        let startX;
-        let scrollLeft;
 
-        scrollContainer.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.pageX - scrollContainer.offsetLeft;
-            scrollLeft = scrollContainer.scrollLeft;
-            stopAutoScroll(); // 用戶開始拖曳時停止自動滾動
-        });
+            // 根據您的 PDF 內容組織的數據陣列
+            const items = [
+                // 翻譯與語言類
+                { img: "女性頭像 1", title: "專屬翻譯助手", desc: "My GPTs", link: "https://chatgpt.com/g/g-68d66708fd308191a2d978eb72e10f90-si-jia-fan-yi" }, 
+                { img: "女性頭像 2", title: "越南區多益考試專家", desc: "My GPTs", link: 'https://chatgpt.com/g/g-vGUdmUbq4-yue-nan-qu-duo-yi-kao-shi-zhuan-jia' }, // <-- 已更新標題和連結
+                { img: "男性頭像 1", title: "台灣高鐵時刻表查詢小幫手", desc: "My GPTs", link: 'https://chatgpt.com/g/g-lNJHGtJ8B-tai-wan-gao-tie-shi-ke-biao-cha-xun-xiao-bang-shou' }, // <-- 標題已更改為「台灣高鐵時刻表查詢小幫手」並新增連結
+                
+                // 虛擬人物與文化類
+                { img: "男性頭像 2 (王校長)", title: "「王校長」AI 虛擬人格", desc: "My GPTs", link: "https://chatgpt.com/g/g-68e172222c0081918f878a0822c6be42-wang-xiao-chang-xu-ni-ren-ge" }, // <-- 已新增連結
+                { img: "紅色S形圖標", title: "六十甲子籤 AI 媽祖", desc: "My GPTs", link: "https://chatgpt.com/g/g-05xczL0Ot-liu-shi-jia-zi-qian-ai-ma-zu" }, // <-- 已新增連結
+                
+                // 查詢與工具類
+                { img: "台鐵火車圖標", title: "台鐵火車 時刻查詢", desc: "My GPTs", link: 'https://chatgpt.com/g/g-sjgst6quy-tai-tie-huo-che-shi-ke-cha-xun' }, // <-- 已新增連結
+                { img: "OpenAI 標誌", title: "2025海聯招生簡章", desc: "My GPTs", link: 'https://chatgpt.com/g/g-JuUiwXa6x-hai-wai-tai-wan-xue-xiao-zhao-sheng-jian-zhang-cha-xun-ji-qi-ren' }, // <-- 標題已更改並新增連結
+                { img: "漢字「漢」圖標", title: "2026海聯招生簡章(待公布)", desc: "My GPTs", link: '' }, // <-- 標題已更改
+                
+                // 教育與考試類
+                { img: "計算機圖標", title: "僑考[數學科] 考古題系統", desc: "My GPTs", link: 'https://chatgpt.com/g/g-68d10ccb901081918564d89450d7a9cf-hai-lian-qiao-kao-shu-xue-ke-kao-gu-ti-xi-系統-110-114xue-nian' }, // <-- 已新增連結
+                { img: "實驗室圖標", title: "僑考[化學科] 考古題系統", desc: "My GPTs", link: 'https://chatgpt.com/g/g-68d3a8315c648191ab97d31be8c41f0b-hai-lian-qiao-kao-hua-xue-ke-kao-gu-ti-xi-系統' }, // <-- 已新增連結
+                { img: "漫畫女性頭像", title: "僑考[國文科] 考古題系統", desc: "My GPTs", link: 'https://chatgpt.com/g/g-68d3fce631dc819184f761093e0a2473-hai-lian-qiao-kao-guo-wen-ke-kao-gu-ti-xi-tong' }, // <-- 已新增連結
+                
+                // 升學與備審資料
+                { img: "臺大醫學系校徽", title: "台灣大學醫學系面試機器人", desc: "My GPTs", link: 'https://chatgpt.com/g/g-680641f75468819183dd96233f32a6d9-tai-da-yi-xue-xi-mian-shi-ji-qi-ren' }, // <-- 標題已更改, 新增連結
+                { img: "女性頭像 3", title: "「備審資料」查詢機器人", desc: "My GPTs", link: 'https://chatgpt.com/g/g-6805a7f6ad608191a69f44c3f6400a4c-wang-ke-jing-bei-shen-zi-liao-cha-xun-ji-qi-ren' }, // <-- 標題已更改, 新增連結
+                { img: "雙人/雙子座圖標", title: "「自主學習計畫」「專題報告」評分專家", desc: "My GPTs", link: 'https://chatgpt.com/g/g-nAqumKon4-zhuan-ti-bao-gao-ping-fen-zhuan-jia' }, // <-- 標題已更改, 新增連結
+                { img: "書本與星形圖標", title: "擔任幹部經驗 範本專家", desc: "My GPTs", link: 'https://chatgpt.com/g/g-4H2RR9PLO-dan-ren-gan-bu-jing-yan-fan-ben-zhuan-jia' }, // <-- 已新增連結
+                { img: "兔子與魔術帽圖標", title: "社團活動經驗 範本專家", desc: "My GPTs", link: 'https://chatgpt.com/g/g-yjlpn7K9h-she-tuan-huo-dong-jing-yan-fan-ben-zhuan-jia' }, // <-- 已新增連結
 
-        scrollContainer.addEventListener('mouseleave', () => {
-            if (isDragging) {
-                isDragging = false;
-                startAutoScrollWithDelay(); // 拖曳結束後延遲恢復自動滾動
-            }
-        });
+                // 招生簡章類
+                { img: "王豫臺 Logo", title: "自主學習計畫書AI撰寫助手", desc: "My GPTs", link: 'https://chatgpt.com/g/g-gCND2oOUg-zi-zhu-xue-xi-ji-hua-shu-zhuan-xie-ji-qi-ren' }, // <-- 標題已更改為「自主學習計畫書AI撰寫助手」
+                { img: "戴墨鏡男性頭像", title: "專屬AI醫療諮詢顧問", desc: "My GPTs", link: 'https://chatgpt.com/g/g-B4W1NncX3-a-i-yi-liao-zi-xun-gu-wen' }, // <-- 標題已更改為「專屬AI醫療諮詢顧問」
+                
+                // 專業與心理類
+                { img: "畢業帽與醫學圖標", title: "數位醫學教授家教", desc: "My GPTs", link: 'https://chatgpt.com/g/g-KQEkMr0Sh-shu-wei-yi-xue-jiao-shou' }, // <-- 標題已更改為「數位醫學教授家教」並新增連結
+                { img: "粉紅玫瑰圖標", title: "魔法心理諮商", desc: "My GPTs", link: 'https://chatgpt.com/g/g-c8CDNHx2r-mo-fa-xin-li-zi-shang' }, // <-- 標題已更改為「魔法心理諮商」並新增連結
+                
+                // 新增的卡片
+                { img: "新 GPT 1", title: "語言治療師", desc: "My GPTs", link: 'https://chatgpt.com/g/g-klx3wedpg-yu-yan-zhi-liao-shi' }, // <-- 標題已更改為「語言治療師」並新增連結
+                { img: "新 GPT 2", title: "知識學術文件洞察助理", desc: "My GPTs", link: 'https://chatgpt.com/g/g-68f9a6f556e88191a79451402a94cedb-zhi-shi-xue-shu-wen-jian-dong-cha-zhu-li' }, // <-- 標題已更改為「知識學術文件洞察助理」並新增連結
+                { img: "新 GPT 3", title: "HTML5 程式助理", desc: "My GPTs", link: 'https://chatgpt.com/g/g-68f9afbef8e0819181a0a009e6bb67e4-html5-cheng-shi-zhu-li' }, // <-- 標題已更改為「HTML5 程式助理」，並更新連結
+                { img: "新 GPT 4", title: "待開發2", desc: "My GPTs", link: '' }, // <-- 標題已更改為「待開發2」
+            ];
 
-        scrollContainer.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                startAutoScrollWithDelay(); // 拖曳結束後延遲恢復自動滾動
-            }
-        });
+            const container = document.querySelector('.container');
+            let htmlContent = '';
+            
+            // 定義新的圖片 URL
+            const gptsIconUrl = "https://images4.imagebam.com/f0/67/72/ME172IB5_o.png"; 
 
-        scrollContainer.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-            const x = e.pageX - scrollContainer.offsetLeft;
-            const walk = (x - startX) * 2; // 調整拖曳速度
-            scrollContainer.scrollLeft = scrollLeft - walk;
-        });
-        
-        // ----------------------------------------------------
-        // 觸控事件處理 (確保移動設備上的滾動也能中斷)
-        // ----------------------------------------------------
-        scrollContainer.addEventListener('touchstart', (e) => {
-            stopAutoScroll();
-            // 在這裡可以設置觸控拖曳邏輯，但瀏覽器通常會自行處理橫向滾動
-        }, { passive: true });
+            items.forEach((item, index) => {
+                // 傳遞 link 參數
+                htmlContent += createItemCard(item.img, item.title, item.desc, gptsIconUrl, item.link);
+            });
 
-        scrollContainer.addEventListener('touchend', (e) => {
-             // 觸控結束後，延遲恢復自動滾動
-            startAutoScrollWithDelay();
-        }, { passive: true });
+            container.innerHTML = htmlContent;
 
-        // ----------------------------------------------------
-        // 確保視窗大小變化時，高度和滾動邏輯正確
-        // ----------------------------------------------------
-        window.addEventListener('resize', () => {
-             // 確保自動滾動計時器在 resize 後仍能正確工作
-        });
+        </script>
 
-        // 頁面加載完成後啟動自動滾動
-        document.addEventListener('DOMContentLoaded', startAutoScroll);
-    </script>
+    </div>
+
 </body>
 </html>
